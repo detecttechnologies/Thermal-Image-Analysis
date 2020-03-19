@@ -1,9 +1,6 @@
 opencv-contrib-python
 pillow
 argparse
-subprocess
-pathlib
-decimal
 numpy
 logzero
 matplotlib
