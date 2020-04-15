@@ -10,7 +10,7 @@
     ```bash
     python thermal_analysis.py <file name>
     ```
-* To extract FFF(RJPG header, can be used by `thermal_analysis.py` of this repo) and JPG files from an SEQ video, you can run the following command:
+* To extract FFF(RJPG header that can be used by `thermal_analysis.py` of this repo) and JPG files from an SEQ video, you can run the following command:
     ```bash
     python split_seq.py <SEQ file name>
     ```

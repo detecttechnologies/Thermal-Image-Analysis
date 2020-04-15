@@ -458,16 +458,19 @@ class CFlir():
             if CFlir.measurement_moving == True:
                 measurement_cont[:,0] += (x-CFlir.xo)
                 measurement_cont[:,1] += (y-CFlir.yo)
-                measurement_cont[:,0][measurement_cont[:,0] >= img.shape[1] ] = img.shape[1] - 1
-                measurement_cont[:,1][measurement_cont[:,1] >= img.shape[0]] = img.shape[0] - 1
-                measurement_cont[:,0][measurement_cont[:,0] <= 0 ] = 1
-                measurement_cont[:,1][measurement_cont[:,1]<= 0] = 1
-                CFlir.xo = x
-                CFlir.yo = y
+                
+                if np.max(measurement_cont[:,0]) >= img.shape[1] or np.amax(measurement_cont[:,1]) >= img.shape[0] or np.amin(measurement_cont[:,0]) <= 0 or np.amin(measurement_cont[:,1]) <= 0:
+                    measurement_cont[:,0] -= (x-CFlir.xo)
+                    measurement_cont[:,1] -= (y-CFlir.yo)
+                    logger.warning("Could not move to intended location. Check if points are exceeding image boundary")
+                else:
+                    CFlir.xo = x
+                    CFlir.yo = y
 
             if CFlir.rect_moving is True:
                 x_new = measurement_rect[0] + (x-CFlir.xo)
                 y_new = measurement_rect[1] + (y-CFlir.yo)
+                
                 if x_new >= img.shape[1]-measurement_rect[2]:
                     x_new = img.shape[1]-measurement_rect[2]-1
                 if x_new <= 0:
@@ -483,23 +486,26 @@ class CFlir():
             if CFlir.scale_moving == True:
                 scale_contour[:,0] += (x-CFlir.xo)
                 scale_contour[:,1] += (y-CFlir.yo)
-                scale_contour[:,0][scale_contour[:,0] >= img.shape[1] ] = img.shape[1] - 1
-                scale_contour[:,1][scale_contour[:,1] >= img.shape[0]] = img.shape[0] - 1
-                scale_contour[:,0][scale_contour[:,0] <= 0 ] = 1
-                scale_contour[:,1][scale_contour[:,1]<= 0] = 1
-                CFlir.xo = x
-                CFlir.yo = y
 
+                if np.max(scale_contour[:,0]) >= img.shape[1] or np.amax(scale_contour[:,1]) >= img.shape[0] or np.amin(scale_contour[:,0]) <= 0 or np.amin(scale_contour[:,1]) <= 0:
+                    scale_contour[:,0] -= (x-CFlir.xo)
+                    scale_contour[:,1] -= (y-CFlir.yo)
+                    logger.warning("Could not move to intended location. Check if points are exceeding image boundary")
+                else:
+                    CFlir.xo = x
+                    CFlir.yo = y
 
             if CFlir.spots_moving == True:
                 spot_cont[:,0,0] += (x-CFlir.xo)
                 spot_cont[:,0,1] += (y-CFlir.yo)
-                spot_cont[:,0,0][spot_cont[:,0,0] >= img.shape[1] ] = img.shape[1] - 1
-                spot_cont[:,0,1][spot_cont[:,0,1] >= img.shape[0]] = img.shape[0] - 1
-                spot_cont[:,0,0][spot_cont[:,0,0] <= 0 ] = 1
-                spot_cont[:,0,1][spot_cont[:,0,1]<= 0] = 1
-                CFlir.xo = x
-                CFlir.yo = y
+
+                if np.max(spot_cont[:,0,0]) >= img.shape[1] or np.amax(spot_cont[:,0,1]) >= img.shape[0] or np.amin(spot_cont[:,0,0]) <= 0 or np.amin(spot_cont[:,0,1]) <= 0:
+                    spot_cont[:,0,0] -= (x-CFlir.xo)
+                    spot_cont[:,0,1] -= (y-CFlir.yo)
+                    logger.warning("Could not move to intended location. Check if points are exceeding image boundary")
+                else:
+                    CFlir.xo = x
+                    CFlir.yo = y
 
         elif event== cv.EVENT_RBUTTONUP:
             CFlir.scale_moving = False
