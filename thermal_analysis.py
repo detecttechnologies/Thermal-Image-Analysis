@@ -35,8 +35,10 @@ if __name__ == "__main__":
     while(1):
         os.system('cls' if os.name == 'nt' else 'clear')
         logger.info('Enter option: \n1. ROI Scaling \n2. Draw Areas \n3. Draw Line \n4. Draw Spots \n5. Change Parameters \n6. Change Color Map\n7. Refresh \n8. Continue\nS. Save thermal image\n0. Exit\n')
-        cv2.namedWindow('Enter input',0)
-        cv2.imshow('Enter input',image)
+        
+        cv2.namedWindow('Enter Input',0) #Scalable Window
+        cv2.resizeWindow('Enter Input', (image.shape[1],image.shape[0]))
+        cv2.imshow('Enter Input',image)
         k = cv2.waitKey(0) & 0xFF
         cv2.destroyAllWindows()
 
@@ -185,6 +187,7 @@ if __name__ == "__main__":
         spot_vals = obj.get_spots_values(image, corrected_array, raw_np, obj.spots) 
 
         cv2.namedWindow('Main Window', 0)
+        cv2.resizeWindow('Main Window', (image.shape[1], image.shape[0]))
         cv2.setMouseCallback('Main Window', CFlir.move_contours, ( obj.measurement_contours, obj.measurement_rects, obj.scale_contours, obj.spots, image, vals, spot_vals ) )
         
         original_image = image.copy()

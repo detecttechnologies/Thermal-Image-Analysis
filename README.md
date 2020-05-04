@@ -1,7 +1,7 @@
 # ThermImageAnalysis
 * `CThermal.py` contains classes for sensor value-->temperature conversion from FLIR files (SEQ, images), and the analysis tools for the same, and for splitting SEQ videos
 * `thermal_analysys.py` contains the main code to be run for the analysis tools on the FLIR files.
-* `split_seq.py` just splits splits an SEQ file into multiple FFF+JPG files
+* `split_seq.py` splits an SEQ file into multiple FFF files
 
 
 ## Usage
