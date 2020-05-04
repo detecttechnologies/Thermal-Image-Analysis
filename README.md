@@ -9,7 +9,8 @@
 * To run thermal analysis on a FLIR image (FFF/jpg/rjpg/...), run the following command in a terminal:
     ```bash
     python thermal_analysis.py <file name>
-    ```
+    ```  
+  The usage instructions and other notes for this are in the [wiki page](https://github.com/detecttechnologies/Thermal_Image_Analysis/wiki/Instructions-Manual-for-the-Thermal-Image-Analysis-software)
 * To extract FFF(RJPG header that can be used by `thermal_analysis.py` of this repo) and JPG files from an SEQ video, you can run the following command:
     ```bash
     python split_seq.py <SEQ file name>
@@ -25,10 +26,11 @@
 
 4. **Spot Measurement** - Draw spots(circular areas with a small radius). Similar to 'Area Measurement'
 
-5. **Change Image Parameters** - Option to change the global parameters: *Object Distance, Relative Humidity, Reflected Apparent Temperature, Atmospheric Temperature, Emissivity* of the image. The default values are obtained from the metadata
+5. **Change Image Parameters** - Option to change the global parameters: *Object Distance, Relative Humidity, Reflected Apparent Temperature, Atmospheric Temperature, Emissivity* of the image. The default values are obtained from the metadatawiki
 
 6. **Change Color Map** - Change the color map representation of the thermal data (Default-Jet). Options available are: *Gray* *(No false colormap)*, *Rainbow*, and *Hot*
 
+7. **Invert Scaling** - Change the way the way the image is scaled between the default scaling, and the raw image.
 
 ## To-Do
 

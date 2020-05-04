@@ -23,7 +23,6 @@ if __name__ == "__main__":
 
     cmap = cv2.COLORMAP_JET
     obj = CFlir (flir_image_path,color_map=cv2.COLORMAP_JET)
-    image = obj.thermal_image.copy()
     raw_np = obj.raw_thermal_np
     original_array= obj.thermal_np
     array = original_array.copy()
@@ -31,10 +30,11 @@ if __name__ == "__main__":
     default_scaled_image, default_scaled_array = obj.default_scaling_image( array, cmap )
     image = default_scaled_image.copy()
     original_default_scaled_array = default_scaled_array.copy()
+    default_scale = True
 
     while(1):
         os.system('cls' if os.name == 'nt' else 'clear')
-        logger.info('Enter option: \n1. ROI Scaling \n2. Draw Areas \n3. Draw Line \n4. Draw Spots \n5. Change Parameters \n6. Change Color Map\n7. Refresh \n8. Continue\nS. Save thermal image\n0. Exit\n')
+        logger.info('Enter option: \n1. ROI Scaling \n2. Draw Areas \n3. Draw Line \n4. Draw Spots \n5. Change Parameters \n6. Change Color Map\n7. Invert Image Scale\n8. Refresh \n9. Continue\nS. Save thermal image\n0. Exit\n')
         
         cv2.namedWindow('Enter Input',0) #Scalable Window
         cv2.resizeWindow('Enter Input', (image.shape[1],image.shape[0]))
@@ -161,6 +161,19 @@ if __name__ == "__main__":
 
 
         elif opt == 7:
+            logger.info("Changing the scale of the image")
+            if default_scale is True:
+                default_scale = False
+                image = obj.thermal_image.copy()
+                array = original_array.copy()
+                default_scaled_array = array.copy()
+            else:
+                default_scale = True
+                image = default_scaled_image.copy()
+                default_scaled_array = original_default_scaled_array.copy()
+            continue
+
+        elif opt == 8:
             array = original_array.copy()
             image = default_scaled_image.copy()
             corrected_array = original_array.copy()
@@ -168,11 +181,11 @@ if __name__ == "__main__":
             obj.scale_contours.clear()
             obj.measurement_contours.clear()
             obj.measurement_rects.clear()
-            obj.emissivity_contours.clear()
             obj.spots.clear()
             cmap = cv2.COLORMAP_JET
+            continue
         
-        elif opt==8:
+        elif opt==9:
             logger.warning('Continuing Without Change')
         
         elif opt==115-48:
