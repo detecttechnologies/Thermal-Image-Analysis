@@ -135,10 +135,12 @@ class CFlir():
 
         # read image metadata needed for conversion of the raw sensor values
         # E=1,SD=1,RTemp=20,ATemp=RTemp,IRWTemp=RTemp,IRT=1,RH=50,PR1=21106.77,PB=1501,PF=1,PO=-7340,PR2=0.012545258
-        try:
-            meta_json = sp.Popen(f'exiftool "{self.image_path}" -Emissivity -ObjectDistance -AtmosphericTemperature -ReflectedApparentTemperature -IRWindowTemperature -IRWindowTransmission -RelativeHumidity -PlanckR1 -PlanckB -PlanckF -PlanckO -PlanckR2 -j', shell=True, stdout=sp.PIPE).communicate()[0]
-        except:
+        if (os.name == 'nt'):
+            #Windows
             meta_json = sp.Popen(f'exiftool.exe "{self.image_path}" -Emissivity -ObjectDistance -AtmosphericTemperature -ReflectedApparentTemperature -IRWindowTemperature -IRWindowTransmission -RelativeHumidity -PlanckR1 -PlanckB -PlanckF -PlanckO -PlanckR2 -j', shell=True, stdout=sp.PIPE).communicate()[0]
+        else:
+            #Linux
+            meta_json = sp.Popen(f'exiftool "{self.image_path}" -Emissivity -ObjectDistance -AtmosphericTemperature -ReflectedApparentTemperature -IRWindowTemperature -IRWindowTransmission -RelativeHumidity -PlanckR1 -PlanckB -PlanckF -PlanckO -PlanckR2 -j', shell=True, stdout=sp.PIPE).communicate()[0]
 
         meta = json.loads(meta_json)[0]
 
@@ -155,7 +157,7 @@ class CFlir():
         raw_thermal_np = np.array(thermal_img)
 
         # raw values -> temperature E=meta['Emissivity']
-        raw2tempfunc = (lambda x: CFlir.raw2temp(x, E=0.9, OD=CFlir.parse_length(meta['ObjectDistance']), RTemp=CFlir.parse_temp(meta['ReflectedApparentTemperature']), ATemp=CFlir.parse_temp(meta['AtmosphericTemperature']), IRWTemp=CFlir.parse_temp(meta['IRWindowTemperature']), IRT=meta['IRWindowTransmission'], RH=CFlir.parse_percent(meta['RelativeHumidity']), PR1=meta['PlanckR1'], PB=meta['PlanckB'], PF=meta['PlanckF'], PO=meta['PlanckO'], PR2=meta['PlanckR2']))
+        raw2tempfunc = (lambda x: CFlir.raw2temp(x, E=meta['Emissivity'], OD=CFlir.parse_length(meta['ObjectDistance']), RTemp=CFlir.parse_temp(meta['ReflectedApparentTemperature']), ATemp=CFlir.parse_temp(meta['AtmosphericTemperature']), IRWTemp=CFlir.parse_temp(meta['IRWindowTemperature']), IRT=meta['IRWindowTransmission'], RH=CFlir.parse_percent(meta['RelativeHumidity']), PR1=meta['PlanckR1'], PB=meta['PlanckB'], PF=meta['PlanckF'], PO=meta['PlanckO'], PR2=meta['PlanckR2']))
         thermal_np = raw2tempfunc(raw_thermal_np)
 
         return thermal_np,raw_thermal_np,meta

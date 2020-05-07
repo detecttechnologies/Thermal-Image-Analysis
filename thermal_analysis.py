@@ -94,7 +94,7 @@ if __name__ == "__main__":
             try:
                 E 
             except:
-                E = 0.9
+                E = obj.meta['Emissivity']
             
             logger.info('\n1.Object Distance: {}\n2.Relative Humidity: {}\n3.Reflected Apparent Temperature: {}\n4.Atmospheric Temperature: {}\n5.Emissivity of image: {}\n'.format(OD,RH,RAT,AT,E))
             
@@ -190,7 +190,7 @@ if __name__ == "__main__":
         
         elif opt==115-48:
             logger.info('Saving image')
-            cv2.imwrite(flir_image_path.split('.')[0]+'.jpg', image) #Change to class object function call
+            cv2.imwrite(flir_image_path.split('.')[0]+'_formatted.jpg', image) #Change to class object function call
 
         elif opt==0 or opt==65 or opt==110: #65+18=113, which is `q`
             logger.warning('Exiting...')
