@@ -6,6 +6,11 @@
 
 ## Usage
 * First, install the requirements for using the code in this repo using `pip install -r requirements.txt`
+* For Linux users, check if exiftool is installed, by running ```exiftool``` in the command line.
+* For Windows users, do the following: 
+    * Download exiftool (for your OS) from [here](https://exiftool.org/)
+    * Extract 'exiftool(-k).exe' to the folder where you're running the code from
+    * Rename it to 'exiftool.exe'
 * To run thermal analysis on a FLIR image (FFF/jpg/rjpg/...), run the following command in a terminal:
     ```bash
     python thermal_analysis.py <file name>
