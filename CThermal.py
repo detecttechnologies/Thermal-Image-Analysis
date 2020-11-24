@@ -10,17 +10,13 @@ from threading import Thread
 
 import cv2 as cv
 import numpy as np
+from logzero import logger
 from matplotlib import pyplot as plt
 from PIL import Image
 from tqdm import tqdm
 
-from logzero import logger
 
-
-"""
-Base Class for FLIR thermal images
-"""
-
+plt.style.use("ggplot")
 
 class CFlir:
     line_flag = False
@@ -37,6 +33,7 @@ class CFlir:
     spots_index = None
 
     def __init__(self, image_path, color_map="jet"):
+        """Base Class for FLIR thermal images"""
         self.image_path = image_path
         self.cmap = color_map
         self.thermal_np, self.raw_thermal_np, self.meta = self.extract_temperatures()
@@ -427,6 +424,7 @@ class CFlir:
         return line, (p1x, p1y), (p2x, p2y)
 
     def line_measurement(self, image, thermal_np, cmap=cv.COLORMAP_JET):
+        logger.info("Please click on the two extreme points of the line")
         img = image.copy()
         line, point1, point2 = CFlir.get_line(img)
         line_temps = np.zeros(len(line))
@@ -442,11 +440,17 @@ class CFlir:
 
         cv.line(img, point1, point2, 255, 2, 8)
 
-        plt.subplot(1, 5, (1, 2))
+        plt.subplot(1, 8, (1, 3))
         plt.imshow(img, cmap="jet")
-        plt.title("Image")
-        plt.subplot(1, 5, (4, 5))
+        basename = Path(self.image_path).name
+        plt.title(basename)
+
+        a = plt.subplot(1, 8, (5, 8))
+        a.set_xlabel("Distance in pixels")
+        a.set_ylabel("Temperature in C")
         plt.plot(line_temps)
+        if max(line_temps) - min(line_temps) < 5:
+            plt.ylim([min(line_temps - 2.5), max(line_temps + 2.5)])
         plt.title("Distance vs Temperature")
         plt.show()
 
@@ -598,19 +602,25 @@ class CFlir:
             for i in range(0, len(measurement_contours)):
                 if cv.pointPolygonTest(measurement_contours[i], (x, y), False) == 1:
                     logger.info(
-                        f"\nMaximum temp: {np.amax(vals[i])}\nMinimum temp: {np.amin(vals[i])}\nAvg: {np.average(vals[i])}\n"
+                        f"\nMaximum temp: {np.amax(vals[i])}\
+                            Minimum temp: {np.amin(vals[i])}\
+                            Avg: {np.average(vals[i])}"
                     )
 
             for i in range(len(measurement_rects)):
                 if CFlir.is_in_rect(measurement_rects[i], (x, y)):
                     logger.info(
-                        f"\nMaximum temp: {np.amax(vals[len(measurement_contours) + i])}\nMinimum temp: {np.amin(vals[len(measurement_contours) + i])}\nAvg: {np.average(vals[len(measurement_contours) + i])}\n"
+                        f"\nMaximum temp: {np.amax(vals[len(measurement_contours) + i])}\
+                            Minimum temp: {np.amin(vals[len(measurement_contours) + i])}\
+                            Avg: {np.average(vals[len(measurement_contours) + i])}\n"
                     )  # vals stores free hand values first, and then rects; hence the 'len(measurement_contours) + i'
 
             for i in range(0, len(spot_contours)):
                 if cv.pointPolygonTest(spot_contours[i], (x, y), False) == 1:
                     logger.info(
-                        f"\nMaximum temp: {np.amax(spot_vals[i])}\nMinimum temp: {np.amin(spot_vals[i])}\nAvg: {np.average(spot_vals[i])}\n"
+                        f"\nMaximum temp: {np.amax(spot_vals[i])}\
+                            Minimum temp: {np.amin(spot_vals[i])}\
+                            Avg: {np.average(spot_vals[i])}\n"
                     )
 
         elif event == cv.EVENT_MBUTTONDOWN:
@@ -656,6 +666,7 @@ class CFlir:
         raw_roi_values = []
         thermal_roi_values = []
         indices = []
+
         if area_rect is None:
             img2 = np.zeros((thermal_image.shape[0], thermal_image.shape[1], 1), np.uint8)
             cv.drawContours(img2, Contours, index, 255, -1)

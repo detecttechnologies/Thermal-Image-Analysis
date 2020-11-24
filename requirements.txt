@@ -1,3 +1,4 @@
+PyInquirer
 opencv-contrib-python
 pillow
 argparse
