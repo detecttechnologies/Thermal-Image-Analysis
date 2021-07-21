@@ -48,6 +48,6 @@ Image can be saved with or without markings, plots and values. Custom savefile(.
  - Install [exiftool](https://exiftool.org/install.html)
 
 ## Usage
- - Run the program with `python therm.py`
- - Select the original `.jpg` file or the custom saved `.pkl` file
+ - Run the program with `python main.py`
+ - Select the original thermal image file or the custom saved `.pkl` file. (Find some samples in `sample_images`)
  
