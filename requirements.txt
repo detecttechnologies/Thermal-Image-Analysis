@@ -1,8 +1,7 @@
-PyInquirer
-opencv-contrib-python
-pillow
-argparse
-numpy
-logzero
-matplotlib
-tqdm
+Pillow >= 8.1.2
+matplotlib >= 3.4.0
+numpy >= 1.19.5
+pygame >= 2.0.1
+pygame_gui >= 0.5.7
+scipy >= 1.6.2
+git+git://github.com/mukheshpugal/thermal_base.git@main#egg=thermal-base
