@@ -36,7 +36,6 @@ Change rgb colormap to one of the following options:
 
 <p align="center"><img src="assets/images/cmap.png" /><br/>Change colormap.</p>
 
-
 ### Emissivity scaling
 Change reflected apparent temperature and emissivity of marked region.
 
