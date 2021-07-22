@@ -3,6 +3,8 @@ A tool for analyzing and annotating thermal images.
  - `main.py` contains code for GUI and canvas tools.
  - `utils.py` contains code for auxiliary functions.
 
+[![Quality check](https://github.com/detecttechnologies/Thermal_Image_Analysis/actions/workflows/qualitycheck.yml/badge.svg)](https://github.com/detecttechnologies/Thermal_Image_Analysis/actions)
+
 ## Features
 
 <p align="center"><img src="assets/images/main.png" /><br/>Main menu</p>
@@ -44,7 +46,7 @@ Change reflected apparent temperature and emissivity of marked region.
 Image can be saved with or without markings, plots and values. Custom savefile(.pkl) saves all data and can be used to revive the previous session.
 
 ## Installation
- - Run installation once with `$ pip install -r requirements.txt`
+ - Run installation once with `pip install -r requirements.txt`
  - Install [exiftool](https://exiftool.org/install.html)
 
 ## Usage

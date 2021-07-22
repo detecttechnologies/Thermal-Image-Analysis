@@ -1,13 +1,16 @@
+"""GUI application for thermal image analysis."""
 import os
 import pickle
+import sys
 from tkinter.messagebox import showwarning
+from PIL.Image import new
 
 import numpy as np
 import pygame
 import pygame_gui as pygui
 from scipy.ndimage.interpolation import zoom
-
 from thermal_base.thermal_base import ThermalImage, ThermalImageHelpers
+
 from utils import WindowHandler, openImage, saveImage
 
 pygame.init()
@@ -16,8 +19,14 @@ NEW_FILE = False
 
 
 class Manager(pygui.UIManager):
+    """Class for manager.
+
+    A manager is a set of menu buttons and descriptions.
+    A manager is assigned to each page of the application.
+    """
     def __init__(self, buttons, textbox=None, fields=None):
-        super(Manager, self).__init__(WINDOW_SIZE)
+        """Initilizer for manager."""
+        super().__init__(WINDOW_SIZE)
         self.buttons = [
             (pygui.elements.UIButton(relative_rect=pygame.Rect(pos, size), text=text, manager=self), func)
             for pos, size, text, func in buttons
@@ -40,16 +49,18 @@ class Manager(pygui.UIManager):
             ]
 
     def process_events(self, event):
+        """Process button presses."""
         if event.type == pygame.USEREVENT:
             if event.user_type == pygui.UI_BUTTON_PRESSED:
                 for button, func in self.buttons:
                     if event.ui_element == button:
                         func()
 
-        super(Manager, self).process_events(event)
+        super().process_events(event)
 
 
 class Window:
+    """Class that handles the main window."""
     fonts = [
         pygame.font.SysFont("monospace", 20),
         pygame.font.SysFont("monospace", 24),
@@ -57,11 +68,12 @@ class Window:
     ]
 
     cursors = [pygame.image.load("./assets/cursors/pointer.png"), pygame.image.load("./assets/cursors/crosshair.png")]
-    logo = pygame.transform.scale(pygame.image.load("./assets/DTIcon.png"), (100, 100))
+    logo = pygame.transform.scale(pygame.image.load("./assets/DTlogo.png"), (100, 100))
     clip = lambda x, a, b: a if x < a else b if x > b else x
 
     @staticmethod
     def renderText(surface, text, location):
+        """Render text at a given location."""
         whitetext = Window.fonts[2].render(text, 1, (255, 255, 255))
         Window.fonts[0].set_bold(True)
         blacktext = Window.fonts[2].render(text, 1, (0, 0, 0))
@@ -76,10 +88,11 @@ class Window:
         surface.blit(whitetext, textrect)
 
     def __init__(self, thermal_image=None, filename=None):
+        """Initializer for the main window."""
         self.exthandler = WindowHandler()
         if thermal_image is not None:
             mat = thermal_image.thermal_np.astype(np.float32)
-        
+
             if mat.shape != (512, 640):
                 y0, x0 = mat.shape
                 mat = zoom(mat, [512 / y0, 640 / x0])
@@ -189,7 +202,12 @@ class Window:
                 ((15, 470), (215, 45), "Reset", lambda: self.work("emissivity", "reset")),
                 ((15, 530), (215, 45), "Back", lambda: self.changeMode("main")),
             ],
-            textbox=((15, 15), (215, -1), "Select region, enter values and press continue"),
+            textbox=(
+                (15, 15),
+                (215, -1),
+                "Select region, enter values and press continue. Click to mark vertices."
+                    "Press Ctrl and click to close the selection",
+            ),
             fields=[
                 ((15, 165), (215, 45), "Emissivity:"),
                 ((15, 240), (215, 45), "Reflected Temp.:"),
@@ -204,6 +222,7 @@ class Window:
         self.background.fill((0, 0, 0))
 
     def changeMode(self, mode):
+        """Change mode."""
         # Mode change - reset handler
         if self.mode == "line":
             if mode in ("main", "line"):
@@ -217,7 +236,7 @@ class Window:
         self.mode = mode
 
     def work(self, mode, *args):
-
+        """Work based on mode."""
         if mode == "reset":
             # Resetting overlays and plots
             self.overlays = pygame.Surface((WINDOW_SIZE[0] - 245, 512), pygame.SRCALPHA)
@@ -270,6 +289,8 @@ class Window:
                 xmax = max(x_coords)
                 ymin = min(y_coords)
                 ymax = max(y_coords)
+                if xmin == xmax or ymin == ymax:
+                    return
                 self.boxNum += 1
                 chunk = self.mat_emm[ymin:ymax, xmin:xmax]
                 self.exthandler.addToTable([f"a{self.boxNum}", np.min(chunk), np.max(chunk), np.mean(chunk)])
@@ -284,7 +305,7 @@ class Window:
             self.cbarVals = [minVal + i * delVal / 4 for i in range(5)][::-1]
 
             cbar = np.row_stack(20 * (np.arange(256),))[:, ::-1].astype(np.float32)
-            
+
             self.image = ThermalImageHelpers.cmap_matplotlib(self.mat, args[0])
             cbar = ThermalImageHelpers.cmap_matplotlib(cbar, args[0])
 
@@ -293,7 +314,7 @@ class Window:
             self.imsurf.blit(pygame.surfarray.make_surface(cbar[..., ::-1]), (663, 85))
             for i, val in enumerate(self.cbarVals):
                 self.imsurf.blit(self.fonts[0].render(f"{val:.1f}", 1, (255, 255, 255)), (690, 75 + i * 65))
-            self.imsurf.blit(self.fonts[0].render(u"\N{DEGREE SIGN}" + "C", 1, (255, 255, 255)), (660, 60))
+            self.imsurf.blit(self.fonts[0].render("\N{DEGREE SIGN}" + "C", 1, (255, 255, 255)), (660, 60))
             self.imsurf.blit(self.logo, (658, 405))
 
         if mode == "scale":
@@ -345,6 +366,7 @@ class Window:
             self.work("scale", "reset")
 
     def process(self, event):
+        """Process input event."""
         self.mx, self.my = self.cursor_rect.center = pygame.mouse.get_pos()
         self.cx = Window.clip(self.mx, 245, 884)
         self.cy = Window.clip(self.my, 15, 526)
@@ -379,9 +401,11 @@ class Window:
                     self.selectionComplete = True
 
     def update(self, time_del):
+        """Update events."""
         self.managers[self.mode].update(time_del)
 
     def draw(self, surface):
+        """Draw contents on screen."""
         surface.blit(self.background, (0, 0))
         surface.blit(self.imsurf, (245, 15))
         surface.blit(self.overlays, (245, 15))
@@ -432,7 +456,8 @@ class Window:
 if __name__ == "__main__":
     pygame.mouse.set_visible(False)
 
-    pygame.display.set_caption("Thermo tools")
+    pygame.display.set_caption("Detect Thermal Image Analysis")
+    pygame.display.set_icon(pygame.image.load("./assets/icon_gray.png"))
     surface = pygame.display.set_mode(WINDOW_SIZE)
     surface.blit(Window.fonts[2].render("Loading...", 1, (255, 255, 255)), (460, 275))
     pygame.display.update()
@@ -452,20 +477,25 @@ if __name__ == "__main__":
                 surface.fill((0, 0, 0))
                 surface.blit(Window.fonts[2].render("Loading...", 1, (255, 255, 255)), (460, 275))
                 pygame.display.update()
-                # try:
-                if filename.split(".")[-1] == "pkl":
-                    window = Window(filename=filename)
-                else:
-                    try:
-                        image = ThermalImage(filename, camera_manufacturer="FLIR")
-                    except:
-                        image = ThermalImage(filename, camera_manufacturer="DJI")
-                    window = Window(thermal_image=image)
-                # except Exception as err:
-                #     print(f"Exception: {err}")
-                #     showwarning(title="Error", message="Invalid file selected.")
+                newwindow = None
+                try:
+                    if filename.split(".")[-1] == "pkl":
+                        newwindow = Window(filename=filename)
+                    else:
+                        try:
+                            image = ThermalImage(filename, camera_manufacturer="FLIR")
+                        except Exception:
+                            image = ThermalImage(filename, camera_manufacturer="DJI")
+                        newwindow = Window(thermal_image=image)
+                except Exception as err:
+                    print(f"Exception: {err}")
+                    showwarning(title="Error", message="Invalid file selected.")
+                if newwindow is not None:
+                    if window is not None:
+                        window.exthandler.killThreads()
+                    window = newwindow
             if not window:
-                exit(1)
+                sys.exit(0)
             NEW_FILE = False
 
         for event in pygame.event.get():

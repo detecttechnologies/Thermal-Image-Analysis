@@ -4,4 +4,4 @@ numpy >= 1.19.5
 pygame >= 2.0.1
 pygame_gui >= 0.5.7
 scipy >= 1.6.2
-git+git://github.com/detecttechnologies/thermal_base.git@main#egg=thermal-base
+git+https://github.com/detecttechnologies/thermal_base.git@main

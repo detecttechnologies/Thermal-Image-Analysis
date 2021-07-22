@@ -1,3 +1,4 @@
+"""Utilities for handling backend functions."""
 import csv
 import pickle
 import threading
@@ -6,22 +7,27 @@ from tkinter import Tk, filedialog, messagebox, ttk
 import numpy as np
 import pygame
 from matplotlib import figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
+                                               NavigationToolbar2Tk)
 from PIL import Image
 
 
 class SaveData:
+    """Empty data class."""
     pass
 
 
 class TableView(threading.Thread):
+    """Tkinter thread constituting the table."""
     def __init__(self):
+        """Initializer for table thread."""
         threading.Thread.__init__(self)
         self.start()
         self.initialized = False
         self.data = []
 
     def addRow(self, entry):
+        """Add row to table."""
         while not self.initialized:
             pass
         entry[1:] = [round(ent, 3) for ent in entry[1:]]
@@ -29,6 +35,7 @@ class TableView(threading.Thread):
         self.data.append(entry)
 
     def writeToFile(self, filename):
+        """Write table values to file."""
         with open(filename, "w") as f:
             writer = csv.writer(f, delimiter=",")
             writer.writerow(["Element", "Min", "Max", "Average"])
@@ -36,10 +43,12 @@ class TableView(threading.Thread):
                 writer.writerow(data)
 
     def killTable(self):
+        """Kill table thread."""
         self.root.quit()
         self.root.update()
 
     def run(self):
+        """Run."""
         self.root = Tk()
         self.root.protocol("WM_DELETE_WINDOW", lambda: None)
         self.root.title("Table")
@@ -71,19 +80,24 @@ class TableView(threading.Thread):
 
 
 class Figure(threading.Thread):
+    """Matplotlib threading using tkinter."""
     def __init__(self, plots):
+        """Figure thread initializer."""
         threading.Thread.__init__(self)
         self.plots = plots
         self.start()
 
     def killFigure(self):
+        """Kill figure thread."""
         self.root.quit()
         self.root.update()
 
     def saveFig(self, filename):
+        """Save figure."""
         self.fig.savefig(filename)
 
     def run(self):
+        """Run."""
         self.root = Tk()
         self.root.protocol("WM_DELETE_WINDOW", lambda: None)
         self.root.title("Plot")
@@ -108,7 +122,9 @@ class Figure(threading.Thread):
 
 
 class WindowHandler:
+    """Handles external(graphs/tables) windows."""
     def __init__(self):
+        """Initializer for window handler."""
         self.mainTable = None
         self.mainFigure = None
         self.plots = []
@@ -119,6 +135,7 @@ class WindowHandler:
             self.killThreads()
 
     def killThreads(self):
+        """Kill all running threads."""
         if self.mainTable:
             self.mainTable.killTable()
             self.mainTable.join()
@@ -128,17 +145,19 @@ class WindowHandler:
         self.killed = True
 
     def addToTable(self, entry):
+        """Add entry to table."""
         if self.mainTable is None:
             self.mainTable = TableView()
         self.mainTable.addRow(entry)
 
     def loadGraph(self, plots_in):
+        """Load the graph window."""
         self.plots = plots_in
         if self.plots:
             self.mainFigure = Figure(self.plots)
 
     def linePlot(self, mat, label, startPoint, endPoint, resolution=100, interpolation="bilinear"):
-
+        """Plot line graph."""
         direcion = endPoint - startPoint
         distance = np.linalg.norm(direcion)
         distances = []
@@ -170,23 +189,15 @@ class WindowHandler:
 
 
 def saveImage(window):
+    """Save current image."""
     imageSurface = window.imsurf
     overlays = window.overlays
     exthandler = window.exthandler
     Tk().withdraw()
-    file = filedialog.asksaveasfile()
+    file = filedialog.asksaveasfile(filetypes=[('PNG Image', '*.png')], defaultextension=".png")
 
     if file:
-
-        imgdata = pygame.surfarray.pixels3d(imageSurface).astype(np.uint8)
-        imgdata = np.swapaxes(imgdata, 0, 1)
-
         filename = file.name
-        try:
-            Image.fromarray(imgdata).save(filename)
-        except ValueError:
-            filename += ".png"
-            Image.fromarray(imgdata).save(filename)
 
         if messagebox.askquestion("Save options", "Do you want to save with the lines?") == "yes":
             imageSurface.blit(overlays, (0, 0))
@@ -210,8 +221,12 @@ def saveImage(window):
             with open(".".join(filename.split(".")[:-1]) + ".pkl", "wb") as f:
                 pickle.dump(data, f, -1)
 
+        imgdata = pygame.surfarray.pixels3d(imageSurface).astype(np.uint8)
+        imgdata = np.swapaxes(imgdata, 0, 1)
+        Image.fromarray(imgdata).save(filename)
 
 def openImage():
+    """Open new image."""
     Tk().withdraw()
-    filename = filedialog.askopenfilename()
+    filename = filedialog.askopenfilename(title="Open Thermal Image")
     return filename
