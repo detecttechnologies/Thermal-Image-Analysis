@@ -7,7 +7,7 @@ A tool for analyzing and annotating thermal images.
 
 ## Features
 
-<p align="center"><img src="assets/images/main.png" /><br/>Main menu</p>
+<p align="center"><img src="assets/images/main.gif" /><br/>Main menu</p>
 
 ### Spot marking, line measurement and area marking
 
@@ -32,9 +32,9 @@ Scale the entire image based on values in the marked region. Use to enhance low 
 <p align="center"><img src="assets/images/roi.png" /><br/>ROI scaling interface.</p>
 
 ### Change colormap
-Change rgb colormap to one of the following options:
+Change colormap to one of the following options:
 
-<p align="center"><img src="assets/images/cmap.png" /><br/>Change colormap.</p>
+<p align="center"><img src="assets/images/cmap.gif" /><br/>Change colormap.</p>
 
 ### Emissivity scaling
 Change reflected apparent temperature and emissivity of marked region.

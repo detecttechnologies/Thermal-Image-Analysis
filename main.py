@@ -456,7 +456,7 @@ class Window:
 if __name__ == "__main__":
     pygame.mouse.set_visible(False)
 
-    pygame.display.set_caption("Detect Thermal Image Analysis")
+    pygame.display.set_caption("Detect Thermal Image Analysis Tool")
     pygame.display.set_icon(pygame.image.load("./assets/icon_gray.png"))
     surface = pygame.display.set_mode(WINDOW_SIZE)
     surface.blit(Window.fonts[2].render("Loading...", 1, (255, 255, 255)), (460, 275))
