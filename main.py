@@ -3,7 +3,6 @@ import os
 import pickle
 import sys
 from tkinter.messagebox import showwarning
-from PIL.Image import new
 
 import numpy as np
 import pygame
@@ -24,25 +23,36 @@ class Manager(pygui.UIManager):
     A manager is a set of menu buttons and descriptions.
     A manager is assigned to each page of the application.
     """
+
     def __init__(self, buttons, textbox=None, fields=None):
         """Initilizer for manager."""
         super().__init__(WINDOW_SIZE)
         self.buttons = [
-            (pygui.elements.UIButton(relative_rect=pygame.Rect(pos, size), text=text, manager=self), func)
+            (
+                pygui.elements.UIButton(
+                    relative_rect=pygame.Rect(pos, size), text=text, manager=self
+                ),
+                func,
+            )
             for pos, size, text, func in buttons
         ]
         if textbox:
             self.textbox = pygui.elements.ui_text_box.UITextBox(
-                html_text=textbox[2], relative_rect=pygame.Rect(textbox[:2]), manager=self
+                html_text=textbox[2],
+                relative_rect=pygame.Rect(textbox[:2]),
+                manager=self,
             )
         if fields:
             self.fields = [
                 (
                     pygui.elements.ui_text_entry_line.UITextEntryLine(
-                        relative_rect=pygame.Rect((pos[0], pos[1] + 40), size), manager=self
+                        relative_rect=pygame.Rect((pos[0], pos[1] + 40), size),
+                        manager=self,
                     ),
                     pygui.elements.ui_text_box.UITextBox(
-                        html_text=text, relative_rect=pygame.Rect(pos, (-1, -1)), manager=self
+                        html_text=text,
+                        relative_rect=pygame.Rect(pos, (-1, -1)),
+                        manager=self,
                     ),
                 )
                 for pos, size, text in fields
@@ -61,13 +71,17 @@ class Manager(pygui.UIManager):
 
 class Window:
     """Class that handles the main window."""
+
     fonts = [
         pygame.font.SysFont("monospace", 20),
         pygame.font.SysFont("monospace", 24),
         pygame.font.SysFont("arial", 18),
     ]
 
-    cursors = [pygame.image.load("./assets/cursors/pointer.png"), pygame.image.load("./assets/cursors/crosshair.png")]
+    cursors = [
+        pygame.image.load("./assets/cursors/pointer.png"),
+        pygame.image.load("./assets/cursors/crosshair.png"),
+    ]
     logo = pygame.transform.scale(pygame.image.load("./assets/DTlogo.png"), (100, 100))
     clip = lambda x, a, b: a if x < a else b if x > b else x
 
@@ -116,6 +130,7 @@ class Window:
             for entry in data.tableEntries:
                 self.exthandler.addToTable(entry)
             self.exthandler.loadGraph(data.plots)
+            self.exthandler.addRects(data.rects)
 
         self.colorMap = "jet"
         self.lineNum = 0
@@ -131,12 +146,32 @@ class Window:
         self.managers["main"] = Manager(
             buttons=[
                 ((15, 15), (215, 45), "Spot marking", lambda: self.changeMode("spot")),
-                ((15, 75), (215, 45), "Line measurement", lambda: self.changeMode("line")),
+                (
+                    (15, 75),
+                    (215, 45),
+                    "Line measurement",
+                    lambda: self.changeMode("line"),
+                ),
                 ((15, 135), (215, 45), "Area marking", lambda: self.changeMode("area")),
                 ((15, 195), (215, 45), "ROI scaling", lambda: self.changeMode("scale")),
-                ((15, 255), (215, 45), "Change colorMap", lambda: self.changeMode("colorMap")),
-                ((15, 315), (215, 45), "Emissivity scaling", lambda: self.changeMode("emissivity")),
-                ((15, 470), (215, 45), "Reset modifications", lambda: self.work("reset")),
+                (
+                    (15, 255),
+                    (215, 45),
+                    "Change colorMap",
+                    lambda: self.changeMode("colorMap"),
+                ),
+                (
+                    (15, 315),
+                    (215, 45),
+                    "Emissivity scaling",
+                    lambda: self.changeMode("emissivity"),
+                ),
+                (
+                    (15, 470),
+                    (215, 45),
+                    "Reset modifications",
+                    lambda: self.work("reset"),
+                ),
                 ((15, 530), (100, 45), "Open image", lambda: self.work("open")),
                 ((130, 530), (100, 45), "Save image", lambda: saveImage(self)),
             ]
@@ -147,7 +182,12 @@ class Window:
         )
         self.managers["line"] = Manager(
             buttons=[
-                ((15, 410), (215, 45), "Continue", lambda: self.work("line") if len(self.linePoints) == 2 else None),
+                (
+                    (15, 410),
+                    (215, 45),
+                    "Continue",
+                    lambda: self.work("line") if len(self.linePoints) == 2 else None,
+                ),
                 ((15, 470), (215, 45), "Reset", lambda: self.changeMode("line")),
                 ((15, 530), (215, 45), "Back", lambda: self.changeMode("main")),
             ],
@@ -162,22 +202,47 @@ class Window:
                 ((15, 470), (215, 45), "Continue", lambda: self.work("area")),
                 ((15, 530), (215, 45), "Back", lambda: self.changeMode("main")),
             ],
-            textbox=((15, 15), (215, -1), "Click and drag to draw selection. Select continue to mark"),
+            textbox=(
+                (15, 15),
+                (215, -1),
+                "Click and drag to draw selection. Select continue to mark",
+            ),
         )
         self.managers["scale"] = Manager(
             buttons=[
-                ((15, 270), (215, 45), "Switch to rect mode", lambda: self.work("scale", "switchMode")),
+                (
+                    (15, 270),
+                    (215, 45),
+                    "Switch to rect mode",
+                    lambda: self.work("scale", "switchMode"),
+                ),
                 (
                     (15, 350),
                     (215, 45),
                     "Continue",
-                    lambda: self.work("scale", "scale") if self.selectionComplete else None,
+                    lambda: self.work("scale", "scale")
+                    if self.selectionComplete
+                    else None,
                 ),
-                ((15, 410), (215, 45), "Reset scaling", lambda: self.work("scale", "reset")),
-                ((15, 470), (215, 45), "Reset selection", lambda: self.changeMode("scale")),
+                (
+                    (15, 410),
+                    (215, 45),
+                    "Reset scaling",
+                    lambda: self.work("scale", "reset"),
+                ),
+                (
+                    (15, 470),
+                    (215, 45),
+                    "Reset selection",
+                    lambda: self.changeMode("scale"),
+                ),
                 ((15, 530), (215, 45), "Back", lambda: self.changeMode("main")),
             ],
-            textbox=((15, 15), (215, -1), "Click to mark vertices. Press Ctrl and click to close the selection"),
+            textbox=(
+                (15, 15),
+                (215, -1),
+                "Click to mark vertices. Press Ctrl and click to close the selection",
+            ),
         )
         self.managers["colorMap"] = Manager(
             buttons=[
@@ -185,9 +250,24 @@ class Window:
                 ((15, 75), (215, 45), "Hot", lambda: self.work("colorMap", "hot")),
                 ((15, 135), (215, 45), "Cool", lambda: self.work("colorMap", "cool")),
                 ((15, 195), (215, 45), "Gray", lambda: self.work("colorMap", "gray")),
-                ((15, 255), (215, 45), "Inferno", lambda: self.work("colorMap", "inferno")),
-                ((15, 315), (215, 45), "Copper", lambda: self.work("colorMap", "copper")),
-                ((15, 375), (215, 45), "Winter", lambda: self.work("colorMap", "winter")),
+                (
+                    (15, 255),
+                    (215, 45),
+                    "Inferno",
+                    lambda: self.work("colorMap", "inferno"),
+                ),
+                (
+                    (15, 315),
+                    (215, 45),
+                    "Copper",
+                    lambda: self.work("colorMap", "copper"),
+                ),
+                (
+                    (15, 375),
+                    (215, 45),
+                    "Winter",
+                    lambda: self.work("colorMap", "winter"),
+                ),
                 ((15, 530), (215, 45), "Back", lambda: self.changeMode("main")),
             ]
         )
@@ -197,16 +277,23 @@ class Window:
                     (15, 410),
                     (215, 45),
                     "Continue",
-                    lambda: self.work("emissivity", "update") if self.selectionComplete else None,
+                    lambda: self.work("emissivity", "update")
+                    if self.selectionComplete
+                    else None,
                 ),
-                ((15, 470), (215, 45), "Reset", lambda: self.work("emissivity", "reset")),
+                (
+                    (15, 470),
+                    (215, 45),
+                    "Reset",
+                    lambda: self.work("emissivity", "reset"),
+                ),
                 ((15, 530), (215, 45), "Back", lambda: self.changeMode("main")),
             ],
             textbox=(
                 (15, 15),
                 (215, -1),
                 "Select region, enter values and press continue. Click to mark vertices."
-                    "Press Ctrl and click to close the selection",
+                "Press Ctrl and click to close the selection",
             ),
             fields=[
                 ((15, 165), (215, 45), "Emissivity:"),
@@ -257,26 +344,48 @@ class Window:
 
         if mode == "line":
             self.lineNum += 1
-            linePoints = [[a - b for a, b in zip(points, (245, 15))] for points in self.linePoints]
-            pygame.draw.line(self.overlays, (255, 255, 255), linePoints[0], linePoints[1], 3)
+            linePoints = [
+                [a - b for a, b in zip(points, (245, 15))] for points in self.linePoints
+            ]
+            pygame.draw.line(
+                self.overlays, (255, 255, 255), linePoints[0], linePoints[1], 3
+            )
 
-            center = ((linePoints[0][0] + linePoints[1][0]) / 2, (linePoints[0][1] + linePoints[1][1]) / 2)
+            center = (
+                (linePoints[0][0] + linePoints[1][0]) / 2,
+                (linePoints[0][1] + linePoints[1][1]) / 2,
+            )
 
             self.renderText(self.overlays, f"l{self.lineNum}", center)
 
             self.exthandler.linePlot(
-                self.mat_emm, f"l{self.lineNum}", np.array(linePoints[0][::-1]), np.array(linePoints[1][::-1])
+                self.mat_emm,
+                f"l{self.lineNum}",
+                np.array(linePoints[0][::-1]),
+                np.array(linePoints[1][::-1]),
             )
             self.linePoints = []
 
         if mode == "spot":
             self.spotNum += 1
-            self.renderText(self.overlays, f"s{self.spotNum}", (self.mx - 245 + 15, self.my - 15 - 13))
-            pygame.draw.line(
-                self.overlays, (255, 255, 255), (self.mx - 245, self.my - 15 - 5), (self.mx - 245, self.my - 15 + 5), 3
+            self.renderText(
+                self.overlays,
+                f"s{self.spotNum}",
+                (self.mx - 245 + 15, self.my - 15 - 13),
             )
             pygame.draw.line(
-                self.overlays, (255, 255, 255), (self.mx - 245 - 5, self.my - 15), (self.mx - 245 + 5, self.my - 15), 3
+                self.overlays,
+                (255, 255, 255),
+                (self.mx - 245, self.my - 15 - 5),
+                (self.mx - 245, self.my - 15 + 5),
+                3,
+            )
+            pygame.draw.line(
+                self.overlays,
+                (255, 255, 255),
+                (self.mx - 245 - 5, self.my - 15),
+                (self.mx - 245 + 5, self.my - 15),
+                3,
             )
             val = self.mat_emm[self.cy - 15, self.cx - 245]
             self.exthandler.addToTable([f"s{self.spotNum}", val, val, val])
@@ -293,9 +402,14 @@ class Window:
                     return
                 self.boxNum += 1
                 chunk = self.mat_emm[ymin:ymax, xmin:xmax]
-                self.exthandler.addToTable([f"a{self.boxNum}", np.min(chunk), np.max(chunk), np.mean(chunk)])
-                self.renderText(self.overlays, f"a{self.boxNum}", ((xmin + xmax) / 2, (ymin + ymax) / 2))
+                self.exthandler.addToTable(
+                    [f"a{self.boxNum}", np.min(chunk), np.max(chunk), np.mean(chunk)]
+                )
+                self.exthandler.addRects([[xmin, xmax, ymin, ymax]])
                 pygame.draw.lines(self.overlays, (255, 255, 255), True, points, 3)
+                self.renderText(
+                    self.overlays, f"a{self.boxNum}", (xmin + 12, ymin + 10)
+                )
 
         if mode == "colorMap":
             self.colorMap = args[0]
@@ -310,11 +424,22 @@ class Window:
             cbar = ThermalImageHelpers.cmap_matplotlib(cbar, args[0])
 
             self.imsurf = pygame.Surface((WINDOW_SIZE[0] - 245, 512))
-            self.imsurf.blit(pygame.surfarray.make_surface(np.transpose(self.image[..., ::-1], (1, 0, 2))), (0, 0))
+            self.imsurf.blit(
+                pygame.surfarray.make_surface(
+                    np.transpose(self.image[..., ::-1], (1, 0, 2))
+                ),
+                (0, 0),
+            )
             self.imsurf.blit(pygame.surfarray.make_surface(cbar[..., ::-1]), (663, 85))
             for i, val in enumerate(self.cbarVals):
-                self.imsurf.blit(self.fonts[0].render(f"{val:.1f}", 1, (255, 255, 255)), (690, 75 + i * 65))
-            self.imsurf.blit(self.fonts[0].render("\N{DEGREE SIGN}" + "C", 1, (255, 255, 255)), (660, 60))
+                self.imsurf.blit(
+                    self.fonts[0].render(f"{val:.1f}", 1, (255, 255, 255)),
+                    (690, 75 + i * 65),
+                )
+            self.imsurf.blit(
+                self.fonts[0].render("\N{DEGREE SIGN}" + "C", 1, (255, 255, 255)),
+                (660, 60),
+            )
             self.imsurf.blit(self.logo, (658, 405))
 
         if mode == "scale":
@@ -323,7 +448,9 @@ class Window:
                 self.work("colorMap", self.colorMap)
 
             if args[0] == "switchMode":
-                self.managers["scale"].buttons[0][0].set_text(f"Switch to {self.areaMode} mode")
+                self.managers["scale"].buttons[0][0].set_text(
+                    f"Switch to {self.areaMode} mode"
+                )
                 self.areaMode = "poly" if self.areaMode == "rect" else "rect"
                 self.changeMode("scale")
 
@@ -348,7 +475,9 @@ class Window:
                 np_indices = ThermalImageHelpers.coordinates_in_poly(
                     [(x - 245, y - 15) for x, y in self.linePoints], self.raw.shape
                 )
-                self.mat_emm[np_indices] = ThermalImageHelpers.change_emissivity_for_roi(
+                self.mat_emm[
+                    np_indices
+                ] = ThermalImageHelpers.change_emissivity_for_roi(
                     thermal_np=None,
                     meta=self.meta,
                     roi_contours=None,
@@ -377,7 +506,9 @@ class Window:
                 if self.mode == "line":
                     if len(self.linePoints) < 2:
                         self.linePoints.append((self.mx, self.my))
-                if (self.mode == "scale" and self.areaMode == "poly") or self.mode == "emissivity":
+                if (
+                    self.mode == "scale" and self.areaMode == "poly"
+                ) or self.mode == "emissivity":
                     if self.selectionComplete:
                         self.linePoints = []
                         self.selectionComplete = False
@@ -385,7 +516,9 @@ class Window:
                     if pygame.key.get_mods() & pygame.KMOD_CTRL:
                         if len(self.linePoints) > 2:
                             self.selectionComplete = True
-                if (self.mode == "scale" and self.areaMode == "rect") or self.mode == "area":
+                if (
+                    self.mode == "scale" and self.areaMode == "rect"
+                ) or self.mode == "area":
                     self.changeMode(self.mode)
                     self.linePoints.append((self.mx, self.my))
 
@@ -393,7 +526,9 @@ class Window:
                     self.work("spot")
 
         if event.type == pygame.MOUSEBUTTONUP:
-            if (self.mode == "scale" and self.areaMode == "rect") or self.mode == "area":
+            if (
+                self.mode == "scale" and self.areaMode == "rect"
+            ) or self.mode == "area":
                 if len(self.linePoints) == 1:
                     self.linePoints.append((self.cx, self.linePoints[0][1]))
                     self.linePoints.append((self.cx, self.cy))
@@ -423,17 +558,24 @@ class Window:
 
         if self.mode == "line":
             if len(self.linePoints) == 1:
-                pygame.draw.line(surface, (255, 255, 255), self.linePoints[0], (self.cx, self.cy), 3)
+                pygame.draw.line(
+                    surface, (255, 255, 255), self.linePoints[0], (self.cx, self.cy), 3
+                )
             if len(self.linePoints) == 2:
-                pygame.draw.line(surface, (255, 255, 255), self.linePoints[0], self.linePoints[1], 3)
+                pygame.draw.line(
+                    surface, (255, 255, 255), self.linePoints[0], self.linePoints[1], 3
+                )
 
-        if (self.mode == "scale" and self.areaMode == "poly") or self.mode == "emissivity":
+        if (
+            self.mode == "scale" and self.areaMode == "poly"
+        ) or self.mode == "emissivity":
             if len(self.linePoints) > 0:
                 pygame.draw.lines(
                     surface,
                     (255, 255, 255),
                     self.selectionComplete,
-                    self.linePoints + ([] if self.selectionComplete else [(self.cx, self.cy)]),
+                    self.linePoints
+                    + ([] if self.selectionComplete else [(self.cx, self.cy)]),
                     3,
                 )
         if (self.mode == "scale" and self.areaMode == "rect") or self.mode == "area":
@@ -444,7 +586,11 @@ class Window:
                         (255, 255, 255),
                         True,
                         self.linePoints
-                        + [(self.cx, self.linePoints[0][1]), (self.cx, self.cy), (self.linePoints[0][0], self.cy)],
+                        + [
+                            (self.cx, self.linePoints[0][1]),
+                            (self.cx, self.cy),
+                            (self.linePoints[0][0], self.cy),
+                        ],
                         3,
                     )
             else:
@@ -475,7 +621,9 @@ if __name__ == "__main__":
 
             if filename:
                 surface.fill((0, 0, 0))
-                surface.blit(Window.fonts[2].render("Loading...", 1, (255, 255, 255)), (460, 275))
+                surface.blit(
+                    Window.fonts[2].render("Loading...", 1, (255, 255, 255)), (460, 275)
+                )
                 pygame.display.update()
                 newwindow = None
                 try:

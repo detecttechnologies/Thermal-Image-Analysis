@@ -1,7 +1,9 @@
 Pillow >= 8.1.2
 matplotlib >= 3.4.0
 numpy >= 1.19.5
+pandas >= 1.2.4
 pygame >= 2.0.1
 pygame_gui >= 0.5.7
 scipy >= 1.6.2
+xlsxwriter >= 1.4.4
 git+https://github.com/detecttechnologies/thermal_base.git@main

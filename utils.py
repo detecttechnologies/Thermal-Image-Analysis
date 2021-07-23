@@ -1,10 +1,11 @@
 """Utilities for handling backend functions."""
-import csv
 import pickle
 import threading
 from tkinter import Tk, filedialog, messagebox, ttk
+from tkinter.constants import S
 
 import numpy as np
+import pandas as pd
 import pygame
 from matplotlib import figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
@@ -14,11 +15,13 @@ from PIL import Image
 
 class SaveData:
     """Empty data class."""
+
     pass
 
 
 class TableView(threading.Thread):
     """Tkinter thread constituting the table."""
+
     def __init__(self):
         """Initializer for table thread."""
         threading.Thread.__init__(self)
@@ -34,13 +37,11 @@ class TableView(threading.Thread):
         self.treev.insert("", "end", text="L1", values=entry)
         self.data.append(entry)
 
-    def writeToFile(self, filename):
-        """Write table values to file."""
-        with open(filename, "w") as f:
-            writer = csv.writer(f, delimiter=",")
-            writer.writerow(["Element", "Min", "Max", "Average"])
-            for data in self.data:
-                writer.writerow(data)
+    def getDF(self):
+        """Get table values as a pandas data frame."""
+        data = pd.DataFrame(self.data, columns=["Element", "Min", "Max", "Average"])
+        data.set_index("Element", inplace=True)
+        return data
 
     def killTable(self):
         """Kill table thread."""
@@ -57,7 +58,9 @@ class TableView(threading.Thread):
         self.treev.pack(side="right")
         self.treev.pack(side="right")
 
-        verscrlbar = ttk.Scrollbar(self.root, orient="vertical", command=self.treev.yview)
+        verscrlbar = ttk.Scrollbar(
+            self.root, orient="vertical", command=self.treev.yview
+        )
         verscrlbar.pack(side="right", fill="x")
 
         self.treev.configure(xscrollcommand=verscrlbar.set)
@@ -81,6 +84,7 @@ class TableView(threading.Thread):
 
 class Figure(threading.Thread):
     """Matplotlib threading using tkinter."""
+
     def __init__(self, plots):
         """Figure thread initializer."""
         threading.Thread.__init__(self)
@@ -123,12 +127,14 @@ class Figure(threading.Thread):
 
 class WindowHandler:
     """Handles external(graphs/tables) windows."""
+
     def __init__(self):
         """Initializer for window handler."""
         self.mainTable = None
         self.mainFigure = None
         self.plots = []
         self.killed = False
+        self.rects = []
 
     def __del__(self):
         if not self.killed:
@@ -144,6 +150,11 @@ class WindowHandler:
             self.mainFigure.join()
         self.killed = True
 
+    def addRects(self, rects):
+        """Add rectangle coordinates."""
+        for rect in rects:
+            self.rects.append(rect)
+
     def addToTable(self, entry):
         """Add entry to table."""
         if self.mainTable is None:
@@ -156,7 +167,9 @@ class WindowHandler:
         if self.plots:
             self.mainFigure = Figure(self.plots)
 
-    def linePlot(self, mat, label, startPoint, endPoint, resolution=100, interpolation="bilinear"):
+    def linePlot(
+        self, mat, label, startPoint, endPoint, resolution=100, interpolation="bilinear"
+    ):
         """Plot line graph."""
         direcion = endPoint - startPoint
         distance = np.linalg.norm(direcion)
@@ -172,7 +185,11 @@ class WindowHandler:
                 y = int(point[1])
                 dx = point[0] - x
                 dy = point[1] - y
-                val = (np.array([[1 - dx, dx]]) @ mat[x : x + 2, y : y + 2] @ np.array([[1 - dy], [dy]]))[0, 0]
+                val = (
+                    np.array([[1 - dx, dx]])
+                    @ mat[x : x + 2, y : y + 2]
+                    @ np.array([[1 - dy], [dy]])
+                )[0, 0]
 
             if interpolation == "nearest_neighbour":
                 val = mat[round(point[0]), round(point[1])]
@@ -194,16 +211,24 @@ def saveImage(window):
     overlays = window.overlays
     exthandler = window.exthandler
     Tk().withdraw()
-    file = filedialog.asksaveasfile(filetypes=[('PNG Image', '*.png')], defaultextension=".png")
+    file = filedialog.asksaveasfile(
+        filetypes=[("PNG Image", "*.png")], defaultextension=".png"
+    )
 
     if file:
         filename = file.name
 
-        if messagebox.askquestion("Save options", "Do you want to save with the lines?") == "yes":
+        if (
+            messagebox.askquestion(
+                "Save options", "Do you want to save with the annotations?"
+            )
+            == "yes"
+        ):
             imageSurface.blit(overlays, (0, 0))
 
             data = SaveData()
             data.plots = window.exthandler.plots
+            data.rects = window.exthandler.rects
             data.tableEntries = []
             data.mat = window.mat
             data.mat_orig = window.mat_orig
@@ -213,10 +238,27 @@ def saveImage(window):
             data.overlays = pygame.image.tostring(overlays, "RGBA")
 
             if exthandler.mainFigure:
-                exthandler.mainFigure.saveFig(".".join(filename.split(".")[:-1]) + "_plot.png")
+                exthandler.mainFigure.saveFig(
+                    ".".join(filename.split(".")[:-1]) + "_plot.png"
+                )
             if exthandler.mainTable:
-                exthandler.mainTable.writeToFile(".".join(filename.split(".")[:-1]) + "_values.csv")
-                data.tableEntries = exthandler.mainTable.data
+                with pd.ExcelWriter(
+                    ".".join(filename.split(".")[:-1]) + "_values.xlsx",
+                    engine="xlsxwriter",
+                ) as writer:
+                    exthandler.mainTable.getDF().to_excel(writer, sheet_name="Table")
+                    if len(data.plots) > 0:
+                        pd.DataFrame(
+                            [plot[1] for plot in data.plots],
+                            index=[f"l{i+1}" for i in range(len(data.plots))],
+                        ).to_excel(writer, sheet_name="Lines")
+                    data.tableEntries = exthandler.mainTable.data
+                    for i, (x1, x2, y1, y2) in enumerate(data.rects):
+                        pd.DataFrame(
+                            data.mat_emm[y1:y2, x1:x2],
+                            index=y1 + np.arange(y2 - y1),
+                            columns=x1 + np.arange(x2 - x1),
+                        ).to_excel(writer, sheet_name=f"Area{i+1}")
 
             with open(".".join(filename.split(".")[:-1]) + ".pkl", "wb") as f:
                 pickle.dump(data, f, -1)
@@ -224,6 +266,8 @@ def saveImage(window):
         imgdata = pygame.surfarray.pixels3d(imageSurface).astype(np.uint8)
         imgdata = np.swapaxes(imgdata, 0, 1)
         Image.fromarray(imgdata).save(filename)
+        print("Saved successfully")
+
 
 def openImage():
     """Open new image."""
