@@ -1,7 +1,7 @@
 # Thermal Image Analysis
 A tool for analyzing and annotating thermal images.
- - `main.py` contains code for GUI and canvas tools.
- - `utils.py` contains code for auxiliary functions.
+
+This repo relies on the [thermal_base python package](https://github.com/detecttechnologies/thermal_base) for image decoding and manipulation backend.
 
 [![Quality check](https://github.com/detecttechnologies/Thermal_Image_Analysis/actions/workflows/qualitycheck.yml/badge.svg)](https://github.com/detecttechnologies/Thermal_Image_Analysis/actions)
 
