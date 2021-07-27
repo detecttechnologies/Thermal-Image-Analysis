@@ -8,7 +8,8 @@ import numpy as np
 import pygame
 import pygame_gui as pygui
 from scipy.ndimage.interpolation import zoom
-from thermal_base.thermal_base import ThermalImage, ThermalImageHelpers
+from thermal_base import ThermalImage
+from thermal_base import utils as ThermalImageHelpers
 
 from utils import WindowHandler, openImage, saveImage
 
