@@ -1,45 +1,54 @@
-# ThermImageAnalysis
-* `CThermal.py` contains classes for sensor value-->temperature conversion from FLIR files (SEQ, images), and the analysis tools for the same, and for splitting SEQ videos
-* `thermal_analysys.py` contains the main code to be run for the analysis tools on the FLIR files.
-* `split_seq.py` splits an SEQ file into multiple FFF files
+# Thermal Image Analysis
+A tool for analyzing and annotating thermal images.
 
+This repo relies on the [thermal_base python package](https://github.com/detecttechnologies/thermal_base) for image decoding and manipulation backend.
 
-## Usage
-* First, install the requirements for using the code in this repo using `pip install -r requirements.txt`
-* For Linux users, check if exiftool is installed, by running ```exiftool``` in the command line.
-* For Windows users, do the following: 
-    * Download exiftool (for your OS) from [here](https://exiftool.org/)
-    * Extract 'exiftool(-k).exe' to the folder where you're running the code from
-    * Rename it to 'exiftool.exe'
-* To run thermal analysis on a FLIR image (FFF/jpg/rjpg/...), run the following command in a terminal:
-    ```bash
-    python thermal_analysis.py <file name>
-    ```  
-  The usage instructions and other notes for this are in the [wiki page](https://github.com/detecttechnologies/Thermal_Image_Analysis/wiki/Instructions-Manual-for-the-Thermal-Image-Analysis-software)
-* To extract FFF(RJPG header that can be used by `thermal_analysis.py` of this repo) and JPG files from an SEQ video, you can run the following command:
-    ```bash
-    python split_seq.py <SEQ file name>
-    ```
-
+[![Quality check](https://github.com/detecttechnologies/Thermal_Image_Analysis/actions/workflows/qualitycheck.yml/badge.svg)](https://github.com/detecttechnologies/Thermal_Image_Analysis/actions)
 
 ## Features
-1. **ROI Scaling** - Draw a (freehand) Region of Interest area to scale the rest of the image with. This is useful in cases where the region of your interest is low in contrast compared to the scale of the entire image. This drawn area can be moved around to change the region
 
-2. **Area Measurement** - Draw a rectangle, or freehand area(s), to get the *average, minimum, and maximum* temperatures of that area. These can be moved around as well.
+<p align="center"><img src="assets/images/main.gif" /><br/>Main menu</p>
 
-3. **Line Tool** - Draw a line to get a plot (temp vs pixel distance) of the temperatures along the points.
+### Spot marking, line measurement and area marking
 
-4. **Spot Measurement** - Draw spots(circular areas with a small radius). Similar to 'Area Measurement'
+- Extract the temperature values at marked spots
+- Plot temperature values along the marked line(s)
+- Get min, max and average values of marked regions
 
-5. **Change Image Parameters** - Option to change the global parameters: *Object Distance, Relative Humidity, Reflected Apparent Temperature, Atmospheric Temperature, Emissivity* of the image. The default values are obtained from the metadatawiki
+Generates a plot for line plots and a table for measurements in the marked regions.
 
-6. **Change Color Map** - Change the color map representation of the thermal data (Default-Jet). Options available are: *Gray* *(No false colormap)*, *Rainbow*, and *Hot*
+<p align="center"><img src="assets/images/markings.png" /><br/>Markings on the image.</p>
 
-7. **Invert Scaling** - Change the way the way the image is scaled between the default scaling, and the raw image.
+<p align="center">
+    <img src="assets/images/graph.png" width="50%"/>
+    <img src="assets/images/table.png" width ="49%"/>
+    <br/>Plots and measurements.
+</p>
 
-## To-Do
 
-* General Interface changes for easier use 
-* Draw multiple areas in the same go
-* Line visualization while drawing from the 'Draw Line' tool
-* Change free hand to polygon 
+### ROI scaling
+Scale the entire image based on values in the marked region. Use to enhance low contrast areas.
+
+<p align="center"><img src="assets/images/roi.png" /><br/>ROI scaling interface.</p>
+
+### Change colormap
+Change colormap to one of the following options:
+
+<p align="center"><img src="assets/images/cmap.gif" /><br/>Change colormap.</p>
+
+### Emissivity scaling
+Change reflected apparent temperature and emissivity of marked region.
+
+<p align="center"><img src="assets/images/emm.png" /><br/>Emissivity scaling interface.</p>
+
+### Save data
+Image can be saved with or without markings, plots and values. Custom savefile(.pkl) saves all data and can be used to revive the previous session.
+
+## Installation
+ - Run installation once with `pip install -r requirements.txt`
+ - Install [exiftool](https://exiftool.org/install.html)
+
+## Usage
+ - Run the program with `python main.py`
+ - Select the original thermal image file or the custom saved `.pkl` file. (Find some samples in `sample_images`)
+ 
