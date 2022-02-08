@@ -118,6 +118,7 @@ class Window:
             self.raw = thermal_image.raw_sensor_np
             self.meta = thermal_image.meta
             self.overlays = pygame.Surface((640, 512), pygame.SRCALPHA)
+            self.thermalData = thermal_image.thermal_np + 273
         else:
             with open(filename, "rb") as f:
                 data = pickle.load(f)
@@ -173,8 +174,8 @@ class Window:
                     "Reset modifications",
                     lambda: self.work("reset"),
                 ),
-                ((15, 530), (100, 45), "Open image", lambda: self.work("open")),
-                ((130, 530), (100, 45), "Save image", lambda: saveImage(self)),
+                ((15, 530), (100, 45), "Open", lambda: self.work("open")),
+                ((130, 530), (100, 45), "Save", lambda: saveImage(self)),
             ]
         )
         self.managers["spot"] = Manager(
