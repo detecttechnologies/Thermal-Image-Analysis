@@ -42,7 +42,11 @@ Change reflected apparent temperature and emissivity of marked region.
 <p align="center"><img src="assets/images/emm.png" /><br/>Emissivity scaling interface.</p>
 
 ### Save data
-Image can be saved with or without markings, plots and values. Custom savefile(.pkl) saves all data and can be used to revive the previous session.
+Image can be saved with or without markings, plots and values. Custom savefile(.pkl) saves all data and can be used to revive the previous session. New supported save extensions are :
+ - CSV : Saves thermal values of a thermal image in Kelvin as a CSV format.
+ - TIFF: Saves thermal values of a thermal image in Kelvin as a TIFF format.
+
+<p align="center"><img src="assets/images/saveProcess.gif" /><br/>Saving process.</p>
 
 ## Installation
  - Run installation once with `pip install -r requirements.txt`
