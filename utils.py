@@ -219,13 +219,13 @@ def saveImage(window):
         filename = file.split("/")[-1]
 
         if filename.endswith('.tiff'):
-            if (messagebox.askquestion("Before we proceed",f"Are you sure you want to export image as {filename}?") == "yes"):
+            if (messagebox.askquestion("Before we proceed",f"Are you sure you want to export image as {filename} with Kelvin values and not a false colour mapping?") == "yes"):
                 tiffExport(window, file)
             else:
                 messagebox.showinfo("Export Cancelled", f"You have cancelled the process of exporting {filename}")
 
         elif filename.endswith('.csv'):
-            if (messagebox.askquestion("Before we proceed",f"Are you sure you want to export image as {filename}?") == "yes"):
+            if (messagebox.askquestion("Before we proceed",f"Are you sure you want to export image as {filename} with Kelvin values and not a false colour mapping?") == "yes"):
                 csvExport(window, file)
             else:
                 messagebox.showinfo("Export Cancelled", f"You have cancelled the process of exporting {filename}")
@@ -238,7 +238,7 @@ def pngExport(window, filename, imageSurface, overlays, exthandler):
     """Function to export image as .PNG format
 
     Args:
-        window (class Window object): object that refers to main window
+        window (Window): object that refers to main window
         filename (str): Filename with extension. Eg: example.txt
         imageSurface (pygame.SURFACE): [description]
         overlays ([type]): [description]
